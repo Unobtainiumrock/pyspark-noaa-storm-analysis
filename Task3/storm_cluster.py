@@ -180,9 +180,18 @@ s_counts = [severe_dict.get(state, 0) for state in states]
 
 
 
-# Group member 3 code
+# Aatish code
 
+rdd = sc.textFile("gs://msds-694-cohort-14-group12/storm_data.csv")
+header = rdd.first()
+rdd1 = rdd.filter(lambda x: x != header)
 
+rdd_split = rdd1.map(lambda x: x.split(","))
+rdd_SET = rdd_split.map(lambda x: (x[8],x[12]))
+
+rdd_clean = rdd_SET.filter(lambda x: x[0] not in (None, '') and x[1] not in (None, ''))
+rdd_clean = rdd_clean.map(lambda x: [x, 1]).reduceByKey(lambda x,y: x+y).map(lambda x: [x[0][0], x[0][1],x[1]])
+most_storm_prone_states_and_their_storms = rdd_clean.sortBy(lambda x: x[2], ascending=False)
 
 
 # Group member 4 code
