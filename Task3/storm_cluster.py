@@ -17,13 +17,21 @@ rdd_split = rdd1.map(lambda x: x.split(","))
 
 rdd_MAG = rdd_split.map(lambda x: (x[11],x[28]))
 
+print(rdd_MAG.take(5))
+
+def safe_int(x):
+    try:
+        return int(x)
+    except:
+        return float('nan')
+
 def safe_float(x):
     try:
         return float(x)
     except:
         return float('nan')
     
-rdd_MAG_num = rdd_MAG.map(lambda x: (int(x[0]),safe_float(x[1])))
+rdd_MAG_num = rdd_MAG.map(lambda x: (safe_int(x[0]),safe_float(x[1])))
 rdd_MAG_clean = rdd_MAG_num.filter(lambda x: x[1] != 0 and x[1] != float('nan'))
 rdd_MAG_clean = rdd_MAG_clean.filter(lambda x: not math.isnan(x[1]))
 
@@ -34,7 +42,7 @@ avg_per_year = (
     .mapValues(lambda x: x[0] / x[1])                           
 )
 
-data_avg = avg_per_year.collect()
+data_avg = list(avg_per_year.collect())
 
 count_over_50 = (
     rdd_MAG_clean
@@ -43,7 +51,7 @@ count_over_50 = (
     .reduceByKey(lambda a, b: a + b)
 )
 
-data_over50 = count_over_50.collect()
+data_over50 = list(count_over_50.collect())
 
 count_over_20 = (
     rdd_MAG_clean
@@ -52,7 +60,7 @@ count_over_20 = (
     .reduceByKey(lambda a, b: a + b)
 )
 
-data_over20 = count_over_20.collect()
+data_over20 = list(count_over_20.collect())
 
 print(f"Mag_avg = {data_avg}")
 print(f"Mag_over50 = {data_over50}")
