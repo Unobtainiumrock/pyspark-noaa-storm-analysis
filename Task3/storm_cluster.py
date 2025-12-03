@@ -197,6 +197,8 @@ rdd_clean = rdd_SET.filter(lambda x: x[0] not in (None, '') and x[1] not in (Non
 rdd_clean = rdd_clean.map(lambda x: [x, 1]).reduceByKey(lambda x,y: x+y).map(lambda x: [x[0][0], x[0][1],x[1]])
 most_storm_prone_states_and_their_storms = rdd_clean.sortBy(lambda x: x[2], ascending=False)
 
+print(most_storm_prone_states_and_their_storms.collect())
+
 #######################################
 # Alexander code
 #######################################
