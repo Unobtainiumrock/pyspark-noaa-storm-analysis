@@ -15,7 +15,7 @@ rdd1 = rdd.filter(lambda x: x != header)
 
 rdd_split = rdd1.map(lambda x: x.split(","))
 
-rdd_MAG = rdd_split.map(lambda x: (x[10],x[27]))
+rdd_MAG = rdd_split.map(lambda x: (x[11],x[28]))
 
 def safe_float(x):
     try:
