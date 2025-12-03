@@ -192,7 +192,7 @@ header = rdd.first()
 rdd1 = rdd.filter(lambda x: x != header)
 
 rdd_split = rdd1.map(lambda x: x.split(","))
-rdd_SET = rdd_split.map(lambda x: (x[8],x[12]))
+rdd_SET = rdd_split.map(lambda x: (x[9],x[13]))
 
 rdd_clean = rdd_SET.filter(lambda x: x[0] not in (None, '') and x[1] not in (None, ''))
 rdd_clean = rdd_clean.map(lambda x: [x, 1]).reduceByKey(lambda x,y: x+y).map(lambda x: [x[0][0], x[0][1],x[1]])
