@@ -385,7 +385,7 @@ for key, stats in type_impact.take(10):
 ################################################################################
 
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, count, when, coalesce, lit
+from pyspark.sql.functions import col, count as sql_count, when, coalesce, lit
 from pyspark.ml.feature import StringIndexer, OneHotEncoder, VectorAssembler
 from pyspark.ml.classification import RandomForestClassifier
 from pyspark.ml.evaluation import BinaryClassificationEvaluator, MulticlassClassificationEvaluator
@@ -581,7 +581,7 @@ for row in class_dist_nick:
 # Create event count per county/zone (population proxy)
 print("[INFO] Creating population proxy (event count per county)...")
 event_counts_nick = df_nick.groupBy('STATE', 'CZ_NAME') \
-    .agg(count('*').alias('EVENT_COUNT_PER_CZ'))
+    .agg(sql_count('*').alias('EVENT_COUNT_PER_CZ'))
 
 df_nick = df_nick.join(event_counts_nick, on=['STATE', 'CZ_NAME'], how='left')
 df_nick = df_nick.withColumn('EVENT_COUNT_PER_CZ', coalesce(col('EVENT_COUNT_PER_CZ'), lit(1)))
