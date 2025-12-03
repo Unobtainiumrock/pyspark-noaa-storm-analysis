@@ -18,8 +18,6 @@ rdd_split = rdd1.map(lambda x: x.split(","))
 
 rdd_MAG = rdd_split.map(lambda x: (x[11],x[28]))
 
-print(rdd_MAG.take(5))
-
 def safe_int(x):
     try:
         return int(x)
