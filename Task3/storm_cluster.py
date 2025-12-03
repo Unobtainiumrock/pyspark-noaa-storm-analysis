@@ -133,6 +133,10 @@ tornado_count = (
     .map(lambda x: (x[state_idx], 1))
     .reduceByKey(lambda a, b: a + b)
 )
+print("Marjan Code:")
+print("\n--- Number of TORNADOES Per State (descending order) ---")
+for state, count in tornado_count.collect():
+    print(state, count)
 
 
 # Combine different severity indicators (Define severe tornado rule)
@@ -158,7 +162,6 @@ def is_severe(record):
 
 severe_rdd = tornado_rdd.filter(is_severe)
 
-
 # Count severe tornados by State
 
 severe_count = (
@@ -175,7 +178,9 @@ severe_data = severe_count.collect()
 tornado_data = sorted(tornado_data, key=lambda x: -x[1])
 severe_data = sorted(severe_data, key=lambda x: -x[1])
 
-print("\n--- Number of SEVERE TORNADOES Per State ---")
+print("Marjan Code:")
+print("\n--- Number of SEVERE TORNADOES Per State (descending order) ---\n")
+
 for state, count in severe_data:
     print(f"{state}: {count}")
 
