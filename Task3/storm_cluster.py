@@ -1,6 +1,7 @@
 import pyspark
 import math
 from pyspark import SparkContext
+import numpy as np
 
 sc = pyspark.SparkContext(appName="Storm").getOrCreate()
 sc.setLogLevel("ERROR")
