@@ -2,6 +2,8 @@ import pyspark
 import math
 from pyspark import SparkContext
 import numpy as np
+import sys
+import csv
 
 sc = pyspark.SparkContext(appName="Storm").getOrCreate()
 sc.setLogLevel("ERROR")
@@ -292,10 +294,68 @@ print(f"Average indirect injuries: {indirect_injuries}")
 print(f"Average direct deaths: {direct_deaths}")
 print(f"Average indirect deaths: {indirect_deaths}")
 
+#######################################
+# Alan Luo code
+#######################################
+def parse_csv_alan(line):
+    """Parses a CSV line safely, handling quoted fields with commas."""
+    try:
+        return next(csv.reader([line]))
+    except:
+        return []
 
-#######################################
-# Group member 5 code
-#######################################
+def extract_and_clean_alan(row):
+    """Extracts relevant columns and converts metrics to integers."""
+    # Check length for cloud dataset (indices shifted by +1)
+    if not row or len(row) < 30: 
+        return None
+        
+    try:
+        state = row[9]           
+        event_type = row[13]     
+        cz_name = row[16]        
+        mag_type = row[29] if row[29] else "Unknown"
+
+        def to_int(val):
+            return int(float(val)) if val and val.strip() else 0
+
+        injuries = to_int(row[21]) + to_int(row[22]) 
+        deaths = to_int(row[23]) + to_int(row[24])   
+        
+        return (state, cz_name, event_type, mag_type, injuries, deaths)
+    except:
+        return None
+
+# 1. Load Data (Re-using the hardcoded path from the group file)
+rdd_alan = sc.textFile("gs://msds-694-cohort-14-group12/storm_data.csv")
+header_alan = rdd_alan.first()
+data_rdd_alan = rdd_alan.filter(lambda x: x != header_alan)
+
+# 2. Parse and Clean
+cleaned_rdd_alan = data_rdd_alan.map(parse_csv_alan) \
+                                .map(extract_and_clean_alan) \
+                                .filter(lambda x: x is not None)
+
+# 3. Analysis
+geo_impact = cleaned_rdd_alan.map(lambda x: ((x[0], x[1]), x[4] + x[5])) \
+                             .reduceByKey(lambda a, b: a + b) \
+                             .sortBy(lambda x: x[1], ascending=False)
+
+print("="*50)
+print("Top 10 Counties by Human Impact (Alan Luo)")
+print("="*50)
+for loc, count in geo_impact.take(10):
+    print(f"{loc[0]} - {loc[1]}: {count}")
+
+type_impact = cleaned_rdd_alan.map(lambda x: ((x[2], x[3]), (x[4], x[5]))) \
+                              .reduceByKey(lambda a, b: (a[0] + b[0], a[1] + b[1])) \
+                              .sortBy(lambda x: x[1][0] + x[1][1], ascending=False)
+
+print("\n" + "="*50)
+print("Top 10 Event Types by Impact (Alan Luo)")
+print("="*50)
+for key, stats in type_impact.take(10):
+    print(f"Event: {key[0]} (Mag: {key[1]}) -> Injuries: {stats[0]}, Deaths: {stats[1]}")
 
 
 #######################################
