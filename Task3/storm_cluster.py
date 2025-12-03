@@ -199,9 +199,93 @@ rdd_clean = rdd_clean.map(lambda x: [x, 1]).reduceByKey(lambda x,y: x+y).map(lam
 most_storm_prone_states_and_their_storms = rdd_clean.sortBy(lambda x: x[2], ascending=False)
 
 
-# Group member 4 code
+# Alexander code
 
 
+rdd = sc.textFile("gs://msds-694-cohort-14-group12/storm_data.csv")
+
+header = rdd.first()
+rdd = rdd.filter(lambda x: x != header)
+rdd = rdd.map(lambda x: (x.split(",")))
+
+header=header.split(",")
+
+directinjuries=header.index("INJURIES_DIRECT")
+indirectinjuries=header.index("INJURIES_INDIRECT")
+directdeaths=header.index("DEATHS_DIRECT")
+indirectdeaths=header.index("DEATHS_INDIRECT")
+propertydamage=header.index("DAMAGE_PROPERTY")
+cropdamage=header.index("DAMAGE_CROPS")
+mycolumns = [directinjuries, indirectinjuries, directdeaths, indirectdeaths, propertydamage, cropdamage]
+
+for column in mycolumns:
+    print(f"x[{column}] != '' AND")
+
+rdd_filter = rdd.filter(lambda x: x[26] != '' and x[22] != '' and x[23] != '' and x[24] != '' and x[25] != '' and x[27] != '' and x[25] != 'K' and (x[13] == "Flood" or x[13] == "Flash Flood"))
+rdd_filter = rdd_filter.map(lambda x: (x[13],  x[25]))
+
+rdd_filter = rdd_filter.map(lambda x: (x[0],  float(x[1][:-1])*1000 if x[1][-1] == 'K' else float(x[1][:-1])*1000000 if x[1][-1] == 'M' else float(x[1][:-1])*1000000000 if x[1][-1] == 'B' else float(x[1])))
+rdd_filter.collect()
+
+from statistics import mean
+rdd_property_damage = rdd_filter.reduceByKey(lambda a, b: mean([float(a), float(b)]))
+property_damage=rdd_property_damage.collect()
+
+rdd_filter = rdd.filter(lambda x: x[26] != '' and x[22] != '' and x[23] != '' and x[24] != '' and x[25] != '' and x[27] != '' and x[26] != 'K' and (x[13] == "Flood" or x[13] == "Flash Flood"))
+rdd_filter = rdd_filter.map(lambda x: (x[13],  x[26]))
+
+rdd_filter.collect()
+
+rdd_filter = rdd_filter.filter(lambda x: x[1] != 'M')
+rdd_filter.collect()
+
+rdd_filter = rdd_filter.map(lambda x: (x[0],  float(x[1][:-1])*1000 if x[1][-1] == 'K' else float(x[1][:-1])*1000000 if x[1][-1] == 'M' else float(x[1][:-1])*1000000000 if x[1][-1] == 'B' else float(x[1])))
+
+rdd_crop_damage = rdd_filter.reduceByKey(lambda a, b: mean([float(a), float(b)]))
+crop_damage=rdd_crop_damage.collect()
+
+
+rdd_filter = rdd.filter(lambda x: x[26] != '' and x[22] != '' and x[23] != '' and x[24] != '' and x[25] != '' and x[27] != '' and x[21] != 'K' and x[21] != 'M' and x[21] != 'B' and (x[13] == "Flood" or x[13] == "Flash Flood"))
+rdd_filter = rdd_filter.map(lambda x: (x[13],  x[21]))
+
+
+rdd_filter.collect()
+rdd_filter = rdd_filter.map(lambda x: (x[0],  float(x[1][:-1])*1000 if x[1][-1] == 'K' else float(x[1][:-1])*1000000 if x[1][-1] == 'M' else float(x[1][:-1])*1000000000 if x[1][-1] == 'B' else float(x[1])))
+
+rdd_filter.collect()
+
+
+
+rdd_direct_injuries = rdd_filter.reduceByKey(lambda a, b: mean([float(a), float(b)]))
+direct_injuries=rdd_direct_injuries.collect()
+
+rdd_filter = rdd.filter(lambda x: x[26] != '' and x[22] != '' and x[23] != '' and x[24] != '' and x[25] != '' and x[27] != '' and x[22] != 'K' and x[22] != 'M' and x[22] != 'B' and (x[13] == "Flood" or x[13] == "Flash Flood"))
+rdd_filter = rdd_filter.map(lambda x: (x[13],  x[22]))
+
+rdd_filter = rdd_filter.map(lambda x: (x[0],  float(x[1][:-1])*1000 if x[1][-1] == 'K' else float(x[1][:-1])*1000000 if x[1][-1] == 'M' else float(x[1][:-1])*1000000000 if x[1][-1] == 'B' else float(x[1])))
+
+rdd_indirect_injuries = rdd_filter.reduceByKey(lambda a, b: mean([float(a), float(b)]))
+indirect_injuries=rdd_indirect_injuries.collect()
+
+
+rdd_filter = rdd.filter(lambda x: x[26] != '' and x[22] != '' and x[23] != '' and x[24] != '' and x[25] != '' and x[27] != '' and x[23] != 'K' and x[23] != 'M' and x[23] != 'B' and (x[13] == "Flood" or x[13] == "Flash Flood"))
+rdd_filter = rdd_filter.map(lambda x: (x[13],  x[23]))
+
+rdd_filter = rdd_filter.map(lambda x: (x[0],  float(x[1][:-1])*1000 if x[1][-1] == 'K' else float(x[1][:-1])*1000000 if x[1][-1] == 'M' else float(x[1][:-1])*1000000000 if x[1][-1] == 'B' else float(x[1])))
+
+rdd_direct_deaths = rdd_filter.reduceByKey(lambda a, b: mean([float(a), float(b)]))
+direct_deaths=rdd_direct_deaths.collect()
+
+
+
+rdd_filter = rdd.filter(lambda x: x[26] != '' and x[22] != '' and x[23] != '' and x[24] != '' and x[25] != '' and x[27] != '' and x[24] != 'K' and x[24] != 'M' and x[24] != 'B' and (x[13] == "Flood" or x[13] == "Flash Flood"))
+rdd_filter = rdd_filter.map(lambda x: (x[13],  x[24]))
+
+rdd_filter = rdd_filter.map(lambda x: (x[0],  float(x[1][:-1])*1000 if x[1][-1] == 'K' else float(x[1][:-1])*1000000 if x[1][-1] == 'M' else float(x[1][:-1])*1000000000 if x[1][-1] == 'B' else float(x[1])))
+rdd_indirect_deaths2=rdd_filter.map(lambda x: x[1])
+
+rdd_indirect_deaths = rdd_filter.reduceByKey(lambda a, b: mean([float(a), float(b)]))
+indirect_deaths=rdd_indirect_deaths.collect()
 
 
 # Group member 5 code
