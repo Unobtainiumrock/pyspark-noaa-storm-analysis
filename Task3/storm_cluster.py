@@ -221,9 +221,6 @@ propertydamage=header.index("DAMAGE_PROPERTY")
 cropdamage=header.index("DAMAGE_CROPS")
 mycolumns = [directinjuries, indirectinjuries, directdeaths, indirectdeaths, propertydamage, cropdamage]
 
-for column in mycolumns:
-    print(f"x[{column}] != '' AND")
-
 rdd_filter = rdd.filter(lambda x: x[26] != '' and x[22] != '' and x[23] != '' and x[24] != '' and x[25] != '' and x[27] != '' and x[25] != 'K' and (x[13] == "Flood" or x[13] == "Flash Flood"))
 rdd_filter = rdd_filter.map(lambda x: (x[13],  x[25]))
 
