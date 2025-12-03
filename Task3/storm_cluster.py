@@ -1,5 +1,6 @@
 import pyspark
 import math
+from pyspark import SparkContext
 
 sc = pyspark.SparkContext(appName="Storm").getOrCreate()
 sc.setLogLevel("ERROR")
@@ -59,7 +60,121 @@ print(f"Mag_over20 = {data_over20}")
 
 
 
-# Group member 2 code
+# Marjan Farsi Code 
+
+sc = SparkContext("local", "Storm_Tornado_Analysis")
+
+rdd = sc.textFile("storm_g2020.csv")
+
+header = rdd.first()
+columns = header.split(",")
+
+rdd = rdd.filter(lambda row: row != header)
+split_rdd = rdd.map(lambda line: line.split(","))
+
+
+# Get columns indexes
+
+event_type_idx = columns.index("EVENT_TYPE")
+state_idx = columns.index("STATE")
+
+damage_prop_idx = columns.index("DAMAGE_PROPERTY")
+damage_crop_idx = columns.index("DAMAGE_CROPS")
+
+deaths_direct_idx = columns.index("DEATHS_DIRECT")
+deaths_indirect_idx = columns.index("DEATHS_INDIRECT")
+inj_direct_idx = columns.index("INJURIES_DIRECT")
+inj_indirect_idx = columns.index("INJURIES_INDIRECT")
+
+
+# Clean missing data and convert data to appropriate datatypes
+
+def safe_float(x):
+    try:
+        return float(x)
+    except:
+        return 0.0
+
+def safe_int(x):
+    try:
+        return int(x)
+    except:
+        return 0
+
+def fill_and_cast(record):
+    # Replace missing state or event type
+    record[event_type_idx] = record[event_type_idx] or "Unknown"
+    record[state_idx] = record[state_idx] or "Unknown"
+    return record
+
+clean_rdd = split_rdd.map(fill_and_cast)
+
+
+# Filter only Tornado events
+
+tornado_rdd = clean_rdd.filter(lambda x: x[event_type_idx] == "Tornado")
+
+
+# Count total Tornados by states
+
+tornado_count = (
+    tornado_rdd
+    .map(lambda x: (x[state_idx], 1))
+    .reduceByKey(lambda a, b: a + b)
+)
+
+
+# Combine different severity indicators (Define severe tornado rule)
+
+'''
+Indicators of severity, including:
+
+    - Property damage
+    - Crop damage
+    - Direct & indirect deaths
+    - Direct & indirect injuries
+'''
+def is_severe(record):
+    prop = safe_float(record[damage_prop_idx])
+    crop = safe_float(record[damage_crop_idx])
+    deaths = safe_int(record[deaths_direct_idx]) + safe_int(record[deaths_indirect_idx])
+    injuries = safe_int(record[inj_direct_idx]) + safe_int(record[inj_indirect_idx])
+
+    return (prop > 50000) or (crop > 50000) or (deaths > 0) or (injuries > 5)
+
+
+# Filter severe tornados based on the above rule
+
+severe_rdd = tornado_rdd.filter(is_severe)
+
+
+# Count severe tornados by State
+
+severe_count = (
+    severe_rdd
+    .map(lambda x: (x[state_idx], 1))
+    .reduceByKey(lambda a, b: a + b)
+)
+
+# Collect results
+tornado_data = tornado_count.collect()
+severe_data = severe_count.collect()
+
+# Sort for plotting
+tornado_data = sorted(tornado_data, key=lambda x: -x[1])
+severe_data = sorted(severe_data, key=lambda x: -x[1])
+
+print("\n--- Number of SEVERE TORNADOES Per State ---")
+for state, count in severe_data:
+    print(f"{state}: {count}")
+
+# Extract for plotting
+
+states = [x[0] for x in tornado_data]
+t_counts = [x[1] for x in tornado_data]
+
+severe_dict = dict(severe_data)
+s_counts = [severe_dict.get(state, 0) for state in states]
 
 
 
