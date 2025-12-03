@@ -287,6 +287,13 @@ rdd_indirect_deaths2=rdd_filter.map(lambda x: x[1])
 
 rdd_indirect_deaths = rdd_filter.reduceByKey(lambda a, b: mean([float(a), float(b)]))
 indirect_deaths=rdd_indirect_deaths.collect()
+print(f"Average property damage: {property_damage}")
+print(f"Average crop damage: {crop_damage}")
+print(f"Average direct injuries: {direct_injuries}")
+print(f"Average indirect injuries: {indirect_injuries}")
+print(f"Average direct deaths: {direct_deaths}")
+print(f"Average indirect deaths: {indirect_deaths}")
+
 
 #######################################
 # Group member 5 code
