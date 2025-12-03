@@ -5,6 +5,10 @@ import numpy as np
 import sys
 import csv
 
+# gcloud dataproc jobs submit pyspark \
+# gs://msds-694-cohort-14-group12/storm_cluster.py \
+# --cluster=storm-distcomp-cluster --region=us-central1
+
 sc = pyspark.SparkContext(appName="Storm").getOrCreate()
 sc.setLogLevel("ERROR")
 
