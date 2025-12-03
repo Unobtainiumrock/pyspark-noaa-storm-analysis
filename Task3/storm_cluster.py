@@ -63,10 +63,7 @@ print(f"Mag_over20 = {data_over20}")
 
 # Marjan Farsi Code 
 
-sc = SparkContext("local", "Storm_Tornado_Analysis")
-
-rdd = sc.textFile("storm_g2020.csv")
-
+rdd = sc.textFile("gs://msds-694-cohort-14-group12/storm_data.csv")
 header = rdd.first()
 columns = header.split(",")
 
